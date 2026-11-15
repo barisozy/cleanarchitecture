@@ -1,0 +1,8 @@
+# Funding platforms shown on the repository page.
+#
+# One entry is enough for a template: the "Sponsor" button links to the GitHub Sponsors profile of
+# the maintainer. Add a line per platform when the project actually has one, for example:
+#
+#   custom: ["https://example.com/donate"]
+#
+github: barisozy
