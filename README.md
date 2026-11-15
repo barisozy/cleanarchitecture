@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/barisozy/cleanarchitecture/actions/workflows/ci.yml/badge.svg)](https://github.com/barisozy/cleanarchitecture/actions/workflows/ci.yml)
 [![Template](https://github.com/barisozy/cleanarchitecture/actions/workflows/template.yml/badge.svg)](https://github.com/barisozy/cleanarchitecture/actions/workflows/template.yml)
+[![Release](https://img.shields.io/github/v/release/barisozy/cleanarchitecture?label=release&color=blue)](https://github.com/barisozy/cleanarchitecture/releases)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Java 25](https://img.shields.io/badge/java-25-ED8B00?logo=openjdk&logoColor=white)](https://adoptium.net/)
 [![Spring Boot 4.1](https://img.shields.io/badge/Spring%20Boot-4.1.2-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
