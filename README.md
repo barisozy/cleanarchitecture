@@ -6,8 +6,6 @@
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Java 25](https://img.shields.io/badge/java-25-ED8B00?logo=openjdk&logoColor=white)](https://adoptium.net/)
 [![Spring Boot 4.1](https://img.shields.io/badge/Spring%20Boot-4.1.2-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
-[![Gradle 9.9](https://img.shields.io/badge/Gradle-9.9.1-02303A?logo=gradle&logoColor=white)](https://gradle.org/)
-[![PostgreSQL 18](https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
 A small, production-minded starting point for a **Java 25 / Spring Boot 4.1.2** HTTP service. It
 ships the parts every project needs on day one — register/login, JWT access tokens, todos with
