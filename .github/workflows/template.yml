@@ -1,0 +1,58 @@
+name: Template
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: template-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rename:
+    name: Rename and verify the template
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Copy the template into a scratch directory
+        run: |
+          mkdir -p "$RUNNER_TEMP/template"
+          rsync -a --exclude build --exclude .git --exclude .gradle ./ "$RUNNER_TEMP/template/"
+
+      - name: Rename and verify the copy
+        working-directory: ${{ runner.temp }}/template
+        run: |
+          ./gradlew renameProject -Pgroup=com.example -Partifact=demo -Ppackage=com.example.demo --console=plain
+          ./gradlew spotlessApply check --console=plain
+
+      - name: Verify the renamed coordinates
+        working-directory: ${{ runner.temp }}/template
+        run: |
+          grep -q '^rootProject.name = "demo"$' settings.gradle.kts
+          grep -q '^group = "com.example"$' build.gradle.kts
+          grep -q '^    name: demo$' src/main/resources/application.yaml
+          grep -q '^# demo' README.md
+          ! grep -RIn \
+            --exclude-dir=.git \
+            --exclude-dir=.gradle \
+            --exclude-dir=build \
+            --exclude-dir=plan \
+            -e 'com\.barisozy' -e 'cleanarchitecture' .

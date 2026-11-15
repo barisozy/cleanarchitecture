@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  docker:
+    compose:
+      enabled: false
+
+# The API explorer is a development aid. A production deployment does not publish its surface.
+springdoc:
+  api-docs:
+    enabled: false
+  scalar:
+    enabled: false
+
+app:
+  api:
+    # Both values are part of the public contract: the OpenAPI server URL and the type URI of
+    # every ProblemDetail. A deployment must state them; there is no example.com fallback.
+    problem-base-uri: ${PROBLEM_BASE_URI}
+    public-base-url: ${PUBLIC_BASE_URL}
+  security:
+    jwt:
+      # Every token claim is mandatory: a deployment with a fallback issuer or audience would
+      # accept tokens minted for another environment.
+      issuer: ${JWT_ISSUER}
+      audience: ${JWT_AUDIENCE}
+      # The secret is mandatory: a deployment without one fails at startup instead of signing
+      # tokens with a key that everybody knows.
+      secret: ${JWT_SECRET}
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
+logging:
+  structured:
+    format:
+      console: ecs
+  level:
+    root: INFO

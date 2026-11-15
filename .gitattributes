@@ -1,0 +1,18 @@
+# Normalize every text file to LF in the repository and in the working tree.
+* text=auto eol=lf
+
+# Windows scripts must stay CRLF so that cmd.exe and PowerShell parse them correctly.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary artefacts are never touched.
+*.jar binary
+*.war binary
+*.p12 binary
+*.pfx binary
+*.jks binary
+*.keystore binary
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary

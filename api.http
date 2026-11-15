@@ -1,0 +1,177 @@
+### Clean Architecture template - API examples
+### Works with the IntelliJ HTTP Client and the VS Code REST Client.
+###
+### The access token travels in the Authorization header. No endpoint writes a cookie, so there is
+### no CSRF token, no refresh token and no logout call in this file.
+
+@host = http://localhost:8080
+@accessToken = replace-me
+@todoId = replace-me
+@email = demo-{{$randomUUID}}@example.com
+@password = StrongPassword123!
+
+### -----------------------------------------------------------------------------
+### Register - public. Returns the access token in the body.
+### -----------------------------------------------------------------------------
+# @name register
+POST {{host}}/api/auth/register
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+> {%
+    client.global.set("accessToken", response.body.accessToken);
+%}
+
+### -----------------------------------------------------------------------------
+### Login - public. Returns the same body as the registration.
+### -----------------------------------------------------------------------------
+# @name login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+> {%
+    client.global.set("accessToken", response.body.accessToken);
+%}
+
+### -----------------------------------------------------------------------------
+### Current user - the profile behind the token.
+### -----------------------------------------------------------------------------
+GET {{host}}/api/auth/me
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+### -----------------------------------------------------------------------------
+### Create todo - the owner is the authenticated caller.
+### -----------------------------------------------------------------------------
+# @name createTodo
+POST {{host}}/api/todos
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "title": "Write plan",
+  "description": "Finish the architecture document",
+  "dueDate": "2026-11-10"
+}
+
+> {%
+    client.global.set("todoId", response.body.id);
+%}
+
+### -----------------------------------------------------------------------------
+### List todos - page, size and the completion filter. The read model returns the
+### newest todo first, so there is no sort parameter.
+### -----------------------------------------------------------------------------
+GET {{host}}/api/todos?page=0&size=20
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+###
+GET {{host}}/api/todos?completed=true
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+###
+GET {{host}}/api/todos?completed=false
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+### -----------------------------------------------------------------------------
+### Get todo
+### -----------------------------------------------------------------------------
+GET {{host}}/api/todos/{{todoId}}
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+### -----------------------------------------------------------------------------
+### Update todo
+### -----------------------------------------------------------------------------
+PUT {{host}}/api/todos/{{todoId}}
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "title": "Write plan (revised)",
+  "description": "Updated through the HTTP client",
+  "dueDate": "2026-11-12"
+}
+
+### -----------------------------------------------------------------------------
+### Complete todo - the response carries completed=true and completedAt.
+### -----------------------------------------------------------------------------
+POST {{host}}/api/todos/{{todoId}}/complete
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+### -----------------------------------------------------------------------------
+### Delete todo
+### -----------------------------------------------------------------------------
+DELETE {{host}}/api/todos/{{todoId}}
+Authorization: Bearer {{accessToken}}
+
+### -----------------------------------------------------------------------------
+### Error example - no token. Response: 401 ProblemDetail, code security.unauthorized
+### -----------------------------------------------------------------------------
+GET {{host}}/api/todos
+Accept: application/problem+json
+
+### -----------------------------------------------------------------------------
+### Error example - an invalid body. Response: 400 ProblemDetail,
+### code validation.failed with a fieldErrors array.
+### -----------------------------------------------------------------------------
+POST {{host}}/api/auth/register
+Content-Type: application/json
+Accept: application/problem+json
+
+{
+  "email": "not-an-email",
+  "password": "short"
+}
+
+### -----------------------------------------------------------------------------
+### Error example - wrong credentials. Response: 401 ProblemDetail,
+### code auth.invalid-credentials. An unknown address gives the same answer.
+### -----------------------------------------------------------------------------
+POST {{host}}/api/auth/login
+Content-Type: application/json
+Accept: application/problem+json
+
+{
+  "email": "{{email}}",
+  "password": "WrongPassword123!"
+}
+
+### -----------------------------------------------------------------------------
+### Error example - a todo of another user. Response: 404 ProblemDetail,
+### code todo.not-found. The existence of a foreign todo is not disclosed.
+### -----------------------------------------------------------------------------
+GET {{host}}/api/todos/00000000-0000-0000-0000-000000000000
+Accept: application/problem+json
+Authorization: Bearer {{accessToken}}
+
+### -----------------------------------------------------------------------------
+### Operational and documentation endpoints
+### -----------------------------------------------------------------------------
+GET {{host}}/actuator/health
+Accept: application/json
+
+###
+GET {{host}}/v3/api-docs
+Accept: application/json
+
+###
+GET {{host}}/scalar
+Accept: text/html

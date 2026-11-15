@@ -1,0 +1,29 @@
+spring:
+  docker:
+    compose:
+      enabled: false
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+app:
+  api:
+    problem-base-uri: https://test.example.com/problems
+    public-base-url: https://test.example.com
+  security:
+    jwt:
+      issuer: https://test.example.com
+      audience: cleanarchitecture-test
+      # A fixed 32 byte test key, the same one the fixtures use. Not a secret.
+      secret: AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=
+      access-token-ttl: PT1H
+    cors:
+      allowed-origins: http://localhost:3000
+
+logging:
+  level:
+    root: WARN
+    com.barisozy.cleanarchitecture: INFO

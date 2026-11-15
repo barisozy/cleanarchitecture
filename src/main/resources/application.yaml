@@ -1,0 +1,83 @@
+spring:
+  application:
+    name: cleanarchitecture
+  # Java 25 + blocking MVC/JDBC: virtual threads remove the platform-thread ceiling for I/O-bound
+  # requests. Set it to false if a library pins carrier threads in your workload.
+  threads:
+    virtual:
+      enabled: true
+  mvc:
+    # Spring MVC turns its own exceptions into RFC 9457 responses. The custom advice takes over
+    # for the exceptions the application raises and adds the `code` and `fieldErrors` properties.
+    problemdetails:
+      enabled: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    clean-disabled: true
+    validate-on-migrate: true
+    baseline-on-migrate: false
+  docker:
+    compose:
+      enabled: false
+
+server:
+  port: 8080
+  shutdown: graceful
+  error:
+    include-stacktrace: never
+    include-message: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when-authorized
+      group:
+        readiness:
+          include: readinessState,db
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  scalar:
+    path: /scalar
+    enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.barisozy.cleanarchitecture: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level [%X{correlationId:-}] %logger{36} - %msg%n"
+
+app:
+  # The deployment identity (`app.api.*`, the JWT issuer and audience) has no default here: the
+  # `local` profile and the tests define their own values, and a deployment must state them.
+  security:
+    jwt:
+      access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:PT1H}
+      # Base64 encoded, at least 32 bytes. The local profile generates an ephemeral key when this
+      # is absent; every other profile requires it.
+      secret: ${JWT_SECRET:}
+    password:
+      # The BCrypt cost factor of newly hashed passwords. Existing hashes carry their own cost.
+      bcrypt-strength: ${BCRYPT_STRENGTH:10}
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+      # No cookie is written, so the browser never has to send credentials cross-origin.
+      allow-credentials: false
+      max-age: PT1H

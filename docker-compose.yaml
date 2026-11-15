@@ -1,0 +1,63 @@
+# Local development stack for the Clean Architecture template.
+#
+# Usage:
+#   docker compose up -d postgres        # start only PostgreSQL for a host-based run
+#   docker compose --profile app up --build -d   # start PostgreSQL and the API
+#   docker compose down                  # stop
+#   docker compose down -v               # stop and delete the database volume
+#
+# The `backend` service is behind the `app` profile, so a plain `docker compose up` (and Spring
+# Boot's Compose support) only starts PostgreSQL. That keeps `bootRun` from competing with an API
+# container for port 8080. Start the API explicitly with `--profile app` when the image is wanted.
+#
+# The API container uses the `local` Spring profile, so it seeds the development accounts and
+# generates an ephemeral JWT key. The database is still reachable on localhost:5432 for tools.
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: cleanarchitecture-postgres
+    environment:
+      POSTGRES_DB: cleanarchitecture
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports:
+      - "5432:5432"
+    volumes:
+      # PostgreSQL 18 stores the cluster in a major-version-specific subdirectory; the volume must be
+      # mounted at /var/lib/postgresql so that pg_upgrade --link stays possible.
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d cleanarchitecture"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  backend:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cleanarchitecture:local
+    container_name: cleanarchitecture-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      # The image does not contain the development-only Docker Compose launcher; keep the
+      # property disabled so the container never tries to manage its database.
+      DOCKER_COMPOSE_ENABLED: "false"
+      DB_URL: jdbc:postgresql://postgres:5432/cleanarchitecture
+      DB_USERNAME: app
+      DB_PASSWORD: app
+    ports:
+      - "8080:8080"
+    init: true
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  pgdata:

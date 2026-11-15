@@ -1,0 +1,29 @@
+spring:
+  config:
+    # `.env` is a local convenience, not a deployment mechanism. The import is optional so that a
+    # fresh checkout starts without one; a value in the process environment still wins.
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/cleanarchitecture}
+    username: ${DB_USERNAME:app}
+    password: ${DB_PASSWORD:app}
+  docker:
+    compose:
+      enabled: ${DOCKER_COMPOSE_ENABLED:true}
+      lifecycle-management: start-and-stop
+      file: docker-compose.yaml
+
+app:
+  api:
+    problem-base-uri: ${PROBLEM_BASE_URI:https://api.example.com/problems}
+    public-base-url: ${PUBLIC_BASE_URL:http://localhost:8080}
+  security:
+    jwt:
+      issuer: ${JWT_ISSUER:https://api.example.com}
+      audience: ${JWT_AUDIENCE:cleanarchitecture-api}
+      # No secret: the local profile generates an ephemeral key at startup, so every restart
+      # invalidates the issued tokens.
+
+logging:
+  level:
+    com.barisozy.cleanarchitecture: DEBUG
